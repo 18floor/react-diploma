@@ -1,7 +1,8 @@
 import React from 'react';
+import CatalogComponent from '../sections/@catalog';
 
 const Catalog = () => (
-    <div>Каталог</div>
+    <CatalogComponent />
 );
 
 export default Catalog;
