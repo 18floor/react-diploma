@@ -4,7 +4,6 @@ import {
     FETCH_PRODUCTS_SUCCESS_FIRST,
     FETCH_PRODUCTS_SUCCESS_MORE,
     CLEAR_PRODUCTS,
-    SET_LOADING_FALSE,
     SET_SEARCH_STRING,
 } from '../actions/actionTypes';
 
@@ -50,11 +49,6 @@ export default function productsListReducer(state = initialState, action) {
             return {
                 ...state,
                 items: [],
-            };
-        case SET_LOADING_FALSE:
-            return {
-                ...state,
-                loading: false,
             };
         case SET_SEARCH_STRING:
             const {query} = action.payload;

@@ -8,9 +8,11 @@ import {
     FETCH_CATEGORIES_REQUEST,
     FETCH_CATEGORIES_FAILURE,
     FETCH_CATEGORIES_SUCCESS,
-    SET_LOADING_FALSE,
     SET_CATEGORY_ID,
     SET_SEARCH_STRING,
+    FETCH_BESTSELLERS_REQUEST,
+    FETCH_BESTSELLERS_FAILURE,
+    FETCH_BESTSELLERS_SUCCESS,
 } from './actionTypes';
 
 const baseUrl = 'http://localhost:7070/api/';
@@ -76,6 +78,24 @@ export const setSearchValue = (query) => ({
     },
 });
 
+export const fetchBestsellersRequest = () => ({
+    type: FETCH_BESTSELLERS_REQUEST,
+});
+
+export const fetchBestsellersFailure = (error) => ({
+    type: FETCH_BESTSELLERS_FAILURE,
+    payload: {
+        error,
+    },
+});
+
+export const fetchBestsellersSuccess = (items) => ({
+    type: FETCH_BESTSELLERS_SUCCESS,
+    payload: {
+        items,
+    },
+});
+
 export const fetchProducts = (offset) => async (dispatch, getState) => {
     const {productsList: {query}, categoriesList: {categoryId}} = getState();
     dispatch(fetchProductsRequest());
@@ -123,4 +143,13 @@ export const fetchCategories = () => async (dispatch) => {
 export const searchProducts = (query) => async (dispatch) => {
     dispatch(setSearchValue(query));
     dispatch(fetchProducts(0));
+};
+
+export const fetchBestsellers = () => (dispatch) => {
+    dispatch(fetchBestsellersRequest());
+
+    return fetch(`${baseUrl}top-sales`)
+        .then((res) => res.json())
+        .then((res) => dispatch(fetchBestsellersSuccess(res)))
+        .catch((error) => dispatch(fetchBestsellersFailure(error.message)));
 };
