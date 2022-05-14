@@ -1,11 +1,30 @@
-import React from 'react';
-import {NavLink} from 'react-router-dom';
+import React, {useState} from 'react';
+import {NavLink, useHistory} from 'react-router-dom';
 import clsx from 'clsx';
+import {useDispatch, useSelector} from 'react-redux';
 import headerLogo from '../../img/header-logo.png';
 import NavbarMain from '../../components/HeaderMenu';
+import {searchProducts} from '../../actions/actionCreators';
+import {cartItemsSelector} from '../../selectors';
 
 const Header = () => {
+    const dispatch = useDispatch();
+    const {cartItemsCount} = useSelector(cartItemsSelector);
+    const history = useHistory();
+    const handleCartClick = () => history.push('/cart');
+    const [searchInvisible, setSearchInvisible] = useState(true);
+    const [inputValue, setInputValue] = useState('');
 
+    const handleSearchClick = () => {
+        if (!inputValue) {
+            setSearchInvisible((prevState) => !prevState);
+            return;
+        }
+        dispatch(searchProducts(inputValue));
+        setInputValue('');
+        setSearchInvisible(true);
+        history.push('/catalog');
+    };
 
     return (
         <header className="container">
@@ -23,15 +42,18 @@ const Header = () => {
                                     <div
                                         data-id="search-expander"
                                         className="header-controls-pic header-controls-search"
+                                        onClick={handleSearchClick}
                                     />
 
                                     <div
                                         className="header-controls-pic header-controls-cart"
+                                        onClick={handleCartClick}
                                     >
-                                       <div className="header-controls-cart-full">
-                                                10
+                                        {cartItemsCount ? (
+                                            <div className="header-controls-cart-full">
+                                                {cartItemsCount}
                                             </div>
-
+                                        ) : null}
                                         <div className="header-controls-cart-menu"/>
                                     </div>
                                 </div>
@@ -39,13 +61,16 @@ const Header = () => {
                                     data-id="search-form"
                                     className={clsx(
                                         'header-controls-search-form',
-                                        'form-inline')}
+                                        'form-inline',
+                                        searchInvisible && 'invisible',
+                                    )}
                                     onSubmit={(e) => e.preventDefault()}
                                 >
                                     <input
                                         className="form-control"
                                         placeholder="Поиск"
-                                        value=""
+                                        value={inputValue}
+                                        onChange={(e) => setInputValue(e.target.value)}
                                     />
                                 </form>
                             </div>

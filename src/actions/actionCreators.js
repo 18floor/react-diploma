@@ -119,3 +119,8 @@ export const fetchCategories = () => async (dispatch) => {
         dispatch(fetchCategoriesFailure(error.message));
     }
 };
+
+export const searchProducts = (query) => async (dispatch) => {
+    dispatch(setSearchValue(query));
+    dispatch(fetchProducts(0));
+};
