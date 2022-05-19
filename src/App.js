@@ -9,6 +9,8 @@ import About from './pages/About';
 import Contacts from "./pages/Contacts";
 import Main from "./pages/Main";
 import Catalog from "./pages/Catalog";
+import Cart from "./pages/Cart";
+import Product from "./pages/Product";
 
 function App() {
 
@@ -19,6 +21,12 @@ function App() {
                     <Switch>
                         <Route exact path="/about">
                             <About/>
+                        </Route>
+                        <Route exact path="/cart">
+                            <Cart/>
+                        </Route>
+                        <Route exact path="/catalog/:id">
+                            <Product/>
                         </Route>
                         <Route exact path="/catalog">
                             <Catalog/>

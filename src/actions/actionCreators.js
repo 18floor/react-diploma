@@ -13,6 +13,15 @@ import {
     FETCH_BESTSELLERS_REQUEST,
     FETCH_BESTSELLERS_FAILURE,
     FETCH_BESTSELLERS_SUCCESS,
+    REPLACE_CART_ITEMS,
+    SEND_ORDER_REQUEST,
+    SEND_ORDER_SUCCESS,
+    SEND_ORDER_ERROR,
+    CHANGE_FORM_INPUT,
+    CLEAR_FORM,
+    FETCH_PRODUCT_REQUEST,
+    FETCH_PRODUCT_FAILURE,
+    FETCH_PRODUCT_SUCCESS,
 } from './actionTypes';
 
 const baseUrl = 'http://localhost:7070/api/';
@@ -96,6 +105,55 @@ export const fetchBestsellersSuccess = (items) => ({
     },
 });
 
+export const replaceCartItems = (items) => ({
+    type: REPLACE_CART_ITEMS,
+    payload: {
+        items,
+    },
+});
+
+export const sendOrderRequest = () => ({
+    type: SEND_ORDER_REQUEST,
+});
+
+export const sendOrderSuccess = () => ({
+    type: SEND_ORDER_SUCCESS,
+});
+
+export const sendOrderError = (error) => ({
+    type: SEND_ORDER_ERROR,
+    payload: {
+        error,
+    },
+});
+
+export const changeFormInput = (name, value) => ({
+    type: CHANGE_FORM_INPUT,
+    payload: {name, value},
+});
+
+export const clearForm = () => ({
+    type: CLEAR_FORM,
+});
+
+export const fetchProductRequest = () => ({
+    type: FETCH_PRODUCT_REQUEST,
+});
+
+export const fetchProductFailure = (error) => ({
+    type: FETCH_PRODUCT_FAILURE,
+    payload: {
+        error,
+    },
+});
+
+export const fetchProductSuccess = (product) => ({
+    type: FETCH_PRODUCT_SUCCESS,
+    payload: {
+        product,
+    },
+});
+
 export const fetchProducts = (offset) => async (dispatch, getState) => {
     const {productsList: {query}, categoriesList: {categoryId}} = getState();
     dispatch(fetchProductsRequest());
@@ -152,4 +210,57 @@ export const fetchBestsellers = () => (dispatch) => {
         .then((res) => res.json())
         .then((res) => dispatch(fetchBestsellersSuccess(res)))
         .catch((error) => dispatch(fetchBestsellersFailure(error.message)));
+};
+
+export const setCartItems = (items) => (dispatch) => {
+    dispatch(replaceCartItems(items));
+    localStorage.setItem('cart', JSON.stringify(items));
+};
+
+export const sendOrder = (items, form) => (dispatch) => {
+    dispatch(sendOrderRequest());
+    const orderData = items.map((item) => ({id: item.id, price: item.price, count: item.count}));
+    fetch(`${baseUrl}order`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            owner: {
+                phone: form.phone,
+                address: form.address,
+            },
+            items: orderData,
+        }),
+    })
+        .then((res) => {
+            if (res.status >= 200 && res.status < 300) {
+                dispatch(clearForm());
+                dispatch(setCartItems([]));
+                dispatch(sendOrderSuccess());
+            }
+        })
+        .catch((error) => dispatch(sendOrderError(error)));
+};
+
+export const restoreCart = () => (dispatch) => {
+    const items = JSON.parse(localStorage.getItem('cart'));
+    if (items) {
+        dispatch(replaceCartItems(items));
+    }
+};
+
+export const fetchProduct = (history, id) => async (dispatch) => {
+    dispatch(fetchProductRequest());
+
+    return fetch(`${baseUrl}items/${id}`)
+        .then((res) => {
+            if (res.status === 404) {
+                history.push('/404');
+                return null;
+            }
+            return res.json();
+        })
+        .then((res) => dispatch(fetchProductSuccess(res)))
+        .catch((error) => dispatch(fetchProductFailure(error.message)));
 };
